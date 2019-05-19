@@ -40,6 +40,7 @@ def main(args):
     if args.load is not None:
         predictor.load(args.load)
 
+    #def ModelCheckpoint(filepath, monitor='loss', verbose=0, mode='min')
     model_checkpoint = ModelCheckpoint(
         os.path.join(args.model_dir, 'model.pkl'),
         'loss', 1, 'all'

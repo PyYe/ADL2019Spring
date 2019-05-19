@@ -31,6 +31,7 @@ class DialogDataset(Dataset):
 
     def __getitem__(self, index):
         data = dict(self.data[index])
+        #print ('data:', data)
         positives = data['options'][:data['n_corrects']]
         negatives = data['options'][data['n_corrects']:]
         positive_ids = data['option_ids'][:data['n_corrects']]
@@ -45,20 +46,26 @@ class DialogDataset(Dataset):
             n_negative = min(len(negatives), self.n_negative)
 
         # TODO: sample positive indices
-        positive_indices = [0]
-
+        positive_indices = list(range(n_positive))
+        #print ('positive_indices:', positive_indices)
+        
         # TODO: sample negative indices
-        negative_indices = [1, 2, 3, 4]
-
+        negative_indices = list(range(n_negative))
+        #print ('negative_indices:', negative_indices)
+        
         # collect sampled options
         data['options'] = (
             [positives[i] for i in positive_indices]
             + [negatives[i] for i in negative_indices]
         )
+        #print ('data["options"]', data['options'])
+        
         data['option_ids'] = (
             [positive_ids[i] for i in positive_indices]
             + [negative_ids[i] for i in negative_indices]
         )
+        #print ('data["option_ids"]', data['option_ids'])
+        
         data['labels'] = [1] * n_positive + [0] * n_negative
 
         # use the last one utterance
@@ -70,7 +77,7 @@ class DialogDataset(Dataset):
 
     def collate_fn(self, datas):
         batch = {}
-
+        #print ('datas:',datas)
         # collate lists
         batch['id'] = [data['id'] for data in datas]
         batch['speaker'] = [data['speaker'] for data in datas]
@@ -115,4 +122,9 @@ def pad_to_len(arr, padded_len, padding=0):
         padding (int): Integer used to pad.
     """
     # TODO
-    return []
+    
+    if len(arr) > padded_len:
+        padded = arr[:padded_len]
+    else:
+        padded = arr + [padding]*(padded_len-len(arr))
+    return padded

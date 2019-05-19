@@ -1,6 +1,6 @@
 import re
 import torch
-
+import codecs
 
 class Embedding:
     """
@@ -90,9 +90,10 @@ class Embedding:
 
         vectors = []
 
-        with open(embedding_path) as fp:
+        with codecs.open(embedding_path, 'r', 'utf-8') as fp:
 
             row1 = fp.readline()
+            #print ('row1:', row1) # row1: 1999995 300
             # if the first row is not header
             if not re.match('^[0-9]+ [0-9]+$', row1):
                 # seek to 0
@@ -100,6 +101,8 @@ class Embedding:
             # otherwise ignore the header
 
             for i, line in enumerate(fp):
+                #if i < 3:
+                    #print ('i: ', i , ' line: ', line) # i: index ; line: [word] [vector of word] 
                 cols = line.rstrip().split(' ')
                 word = cols[0]
 

@@ -1,10 +1,10 @@
 import json
 import logging
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 from dataset import DialogDataset
 from tqdm import tqdm
-
-
+import gensim
+from gensim.models import Word2Vec
 class Preprocessor:
     """
 
@@ -15,14 +15,15 @@ class Preprocessor:
         self.embedding = embedding
         self.logging = logging.getLogger(name=__name__)
 
-    def tokenize(self, sentence):
+    def tokenize(self, sentence):#sentence to list of words.
         """ Tokenize a sentence.
         Args:
             sentence (str): One string.
         Return:
-            indices (list of str): List of tokens in a sentence.
+            indices (list of str): List of tokens in a sentence. 
         """
         # TODO
+        return list(gensim.utils.tokenize(sentence))
         pass
 
     def sentence_to_indices(self, sentence):
@@ -34,6 +35,17 @@ class Preprocessor:
         """
         # TODO
         # Hint: You can use `self.embedding`
+        train_sequences = []
+        #print ('list(gensim.utils.tokenize(sentence))', list(gensim.utils.tokenize(sentence)))
+        for i, s in enumerate(list(gensim.utils.tokenize(sentence))):
+            #if i == 0:
+            #    print ('s:',s)
+            toks = self.embedding.to_index(s)   # Plus 1 to reserve index 0 for OOV words
+            #if i == 0:
+            #    print ('toks:',toks)
+            train_sequences.append(toks)
+        print ('train_sequences', train_sequences)
+        return train_sequences
         pass
 
     def collect_words(self, data_path, n_workers=4):
@@ -48,15 +60,17 @@ class Preprocessor:
                 + [option['utterance']
                    for option in sample['options-for-next']]
             )
-        utterances = list(set(utterances))
+        utterances = list(set(utterances)) #['str1', 'str2', ...] (unique)
         chunks = [
-            ' '.join(utterances[i:i + len(utterances) // n_workers])
+            ' '.join(utterances[i:i + len(utterances) // n_workers]) #['str1', 'str2'] --> 'str1 str2'
             for i in range(0, len(utterances), len(utterances) // n_workers)
         ]
+        #print ('chunks',chunks)
         with Pool(n_workers) as pool:
             chunks = pool.map_async(self.tokenize, chunks)
             words = set(sum(chunks.get(), []))
 
+        #words =set()
         return words
 
     def get_dataset(self, data_path, n_workers=4, dataset_args={}):
@@ -106,7 +120,7 @@ class Preprocessor:
             list of processed dict.
         """
         processed = []
-        for sample in tqdm(dataset):
+        for sample in tqdm(dataset, ascii=True):
             processed.append(self.preprocess_sample(sample))
 
         return processed
@@ -121,7 +135,7 @@ class Preprocessor:
         processed = {}
         processed['id'] = data['example-id']
 
-        # process messages-so-far
+        # process messages-so-far; processed['context'] processed['speaker']
         processed['context'] = []
         processed['speaker'] = []
         for message in data['messages-so-far']:
@@ -129,7 +143,7 @@ class Preprocessor:
                 self.sentence_to_indices(message['utterance'].lower())
             )
 
-        # process options
+        ## process options
         processed['options'] = []
         processed['option_ids'] = []
 

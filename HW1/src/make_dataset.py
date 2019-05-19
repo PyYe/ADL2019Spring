@@ -8,7 +8,7 @@ import pickle
 import json
 from embedding import Embedding
 from preprocessor import Preprocessor
-
+from multiprocessing import cpu_count
 
 def main(args):
     config_path = os.path.join(args.dest_dir, 'config.json')
@@ -21,15 +21,17 @@ def main(args):
     # collect words appear in the data
     words = set()
     logging.info('collecting words from {}'.format(config['valid_json_path']))
-    words |= preprocessor.collect_words(config['test_json_path'],
+    words |= preprocessor.collect_words(config['valid_json_path'],
                                         n_workers=args.n_workers)
+    #print ('words',words) 
+    #return
     logging.info('collecting words from {}'.format(config['train_json_path']))
     words |= preprocessor.collect_words(config['train_json_path'],
                                         n_workers=args.n_workers)
     logging.info('collecting words from {}'.format(config['test_json_path']))
-    words |= preprocessor.collect_words(config['valid_json_path'],
+    words |= preprocessor.collect_words(config['test_json_path'],
                                         n_workers=args.n_workers)
-
+    
     # load embedding only for words in the data
     logging.info(
         'loading embedding from {}'.format(config['embedding_vec_path'])
@@ -40,6 +42,10 @@ def main(args):
     with open(embedding_pkl_path, 'wb') as f:
         pickle.dump(embedding, f)
 
+    # show how many cpus
+    logging.info(
+        'viewing currently available cpus ... Count : {}'.format(args.n_workers)
+    )
     # update embedding used by preprocessor
     preprocessor.embedding = embedding
 
@@ -79,7 +85,7 @@ def _parse_args():
         description="Preprocess and generate preprocessed pickle.")
     parser.add_argument('dest_dir', type=str,
                         help='[input] Path to the directory that .')
-    parser.add_argument('--n_workers', type=int, default=4)
+    parser.add_argument('--n_workers', type=int, default=cpu_count())
     args = parser.parse_args()
     return args
 

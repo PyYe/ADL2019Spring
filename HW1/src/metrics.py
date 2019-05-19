@@ -44,7 +44,11 @@ class Recall(Metrics):
         # - increase self.n, which implies the total number of samples.
         # - increase self.n_corrects based on the prediction and labels
         #   of the batch.
-
+        #print ('predicts:', predicts)
+        #print ('batch:', batch)
+        self.n += predicts.shape[0]
+        self.n_correct +=  int(sum(predicts.max(1)[1]==batch['labels'].max(1)[1]))
+        
     def get_score(self):
         return self.n_corrects / self.n
 
