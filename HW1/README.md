@@ -15,13 +15,28 @@ cd src/
 python make_dataset.py ../data/
 ```
 
-3. Then you can train a poooor example model as follow:
+3-1. Then you can train a poooor example model as follow:
 ```
 python train.py ../models/example/
 ```
-
+3-2. Then you can train a RNN w/o Attention model as follow:
+```
+python train.py ../models/rnn/
+```
+3-3. Then you can train a RNN w/ Attention model as follow:
+```
+python train.py ../models/rnn_attention/
+```
 4. To predict, run
 ```
 python predict.py ../models/example/ --epoch 3
+```
+or 
+```
+python predict.py ../models/rnn/ --epoch 3
+```
+or
+```
+python predict.py ../models/rnn_attention/ --epoch 3
 ```
 where `--epoch` specifies the save model of which epoch to use.
