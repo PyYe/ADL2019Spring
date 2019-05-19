@@ -19,11 +19,11 @@ python make_dataset.py ../data/
 ```
 python train.py ../models/example/
 ```
- or Then you can train a RNN w/o Attention model as follow:
+<br /> or you can train a RNN w/o Attention model as follow:
 ```
 python train.py ../models/rnn/
 ```
- or Then you can train a RNN w/ Attention model as follow:
+<br /> or you can train a RNN w/ Attention model as follow:
 ```
 python train.py ../models/rnn_attention/
 ```
@@ -31,12 +31,12 @@ python train.py ../models/rnn_attention/
 ```
 python predict.py ../models/example/ --epoch 3
 ```
- or 
+<br /> or 
 ```
 python predict.py ../models/rnn/ --epoch 3
 ```
- or
+<br /> or
 ```
 python predict.py ../models/rnn_attention/ --epoch 3
 ```
- where `--epoch` specifies the save model of which epoch to use.
+<br /> where `--epoch` specifies the save model of which epoch to use.
