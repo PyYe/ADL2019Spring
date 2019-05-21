@@ -44,3 +44,9 @@ python predict.py ../models/rnn/ --epoch 3
 python predict.py ../models/rnn_attention/ --epoch 3
 ```
 where `--epoch` specifies the save model of which epoch to use.
+
+
+5. To debug, run
+```
+python -m pdb code.py ...
+```
