@@ -49,6 +49,7 @@ class Embedding:
             return self.word_dict[word]
 
     def get_dim(self):
+        #print ('self.vectors.shape[1]', self.vectors.shape[1]) #300
         return self.vectors.shape[1]
 
     def get_vocabulary_size(self):

@@ -44,7 +44,7 @@ class Preprocessor:
             #if i == 0:
             #    print ('toks:',toks)
             train_sequences.append(toks)
-        print ('train_sequences', train_sequences)
+        #print ('train_sequences', train_sequences)
         return train_sequences
         pass
 

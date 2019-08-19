@@ -2,7 +2,7 @@ import torch
 import torch.utils.data.dataloader
 from torch.utils.data.dataloader import default_collate
 from tqdm import tqdm
-
+from callbacks import ModelCheckpoint, MetricsLogger, EarlyStopping
 
 class BasePredictor():
     def __init__(self,
@@ -33,7 +33,7 @@ class BasePredictor():
     def fit_dataset(self, data, collate_fn=default_collate, callbacks=[]):
         # Start the training loop.
         while self.epoch < self.max_epochs:
-
+            self.epoch += 1
             # train and evaluate train score
             print('training %i' % self.epoch)
             # TODO: create dataloader for `train`.
@@ -64,8 +64,11 @@ class BasePredictor():
 
             for callback in callbacks:
                 callback.on_epoch_end(log_train, log_valid, self)
-
-            self.epoch += 1
+            
+            if callback.early_stop:
+                print("Early stopping")
+                break
+            
 
     def predict_dataset(self, data,
                         collate_fn=default_collate,
@@ -109,9 +112,11 @@ class BasePredictor():
 
     def load(self, path):
         # TODO: Load saved model from path here.
-        return torch.load(path)
-        pass
-
+        torch_dict = torch.load(path)
+        self.epoch = torch_dict['epoch']
+        self.model.load_state_dict(torch_dict['model'])
+        self.optimizer.load_state_dict(torch_dict['optimizer'])
+        
     def _run_epoch(self, dataloader, training):
         # set model training/evaluation mode
         self.model.train(training)

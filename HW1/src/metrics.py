@@ -45,9 +45,9 @@ class Recall(Metrics):
         # - increase self.n_corrects based on the prediction and labels
         #   of the batch.
         #print ('predicts:', predicts)
-        #print ('batch:', batch)
+        #print ('batch["labels"]:', batch['labels'])
         self.n += predicts.shape[0]
-        self.n_correct +=  int(sum(predicts.max(1)[1]==batch['labels'].max(1)[1]))
+        self.n_corrects +=  int(sum(predicts.max(1)[1]==batch['labels'].max(1)[1]))
         
     def get_score(self):
         return self.n_corrects / self.n

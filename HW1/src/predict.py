@@ -23,14 +23,22 @@ def main(args):
 
     # make model
     if config['arch'] == 'ExampleNet':
-        from example_predictor import ExamplePredictor
+        from predictors import ExamplePredictor
         PredictorClass = ExamplePredictor
-
-    predictor = PredictorClass(metrics=[],
+        predictor = PredictorClass(metrics=[],
                                **config['model_parameters'])
+    elif config['arch'] == 'RnnNet':
+        from predictors import RnnPredictor
+        PredictorClass = RnnPredictor
+        predictor = PredictorClass(metrics=[],
+                               **config['model_parameters'])
+        
+    else:
+        pass
+    
     model_path = os.path.join(
         args.model_dir,
-        'model.pkl.{}'.format(args.epoch))
+        'model.pkl.{}'.format('best' if args.epoch==-1 else args.epoch))
     logging.info('loading model from {}'.format(model_path))
     predictor.load(model_path)
 
@@ -43,7 +51,7 @@ def main(args):
     predicts = predictor.predict_dataset(test, test.collate_fn)
 
     output_path = os.path.join(args.model_dir,
-                               'predict-{}.csv'.format(args.epoch))
+                               'predict-{}.csv'.format('best' if args.epoch==-1 else args.epoch))
     write_predict_csv(predicts, test, output_path)
 
 
@@ -91,7 +99,7 @@ def _parse_args():
                         ' cuda:1, etc.')
     parser.add_argument('--not_load', action='store_true',
                         help='Do not load any model.')
-    parser.add_argument('--epoch', type=int, default=10)
+    parser.add_argument('--epoch', type=int, default=-1)
     args = parser.parse_args()
     return args
 

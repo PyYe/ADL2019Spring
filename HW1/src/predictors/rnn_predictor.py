@@ -1,9 +1,13 @@
 import torch
-from base_predictor import BasePredictor
-from modules import ExampleNet
+torch.cuda.manual_seed_all(518)
+from .base_predictor import BasePredictor
+import sys
+sys.path.append('..')
+from modules import RnnNet
 
+from focalloss import FocalLoss
 
-class ExamplePredictor(BasePredictor):
+class RnnPredictor(BasePredictor):
     """
 
     Args:
@@ -13,10 +17,10 @@ class ExamplePredictor(BasePredictor):
     """
 
     def __init__(self, embedding,
-                 dropout_rate=0.2, loss='BCELoss', margin=0, threshold=None,
+                 dropout_rate=0.2, loss='FocalLoss', margin=0, threshold=None,
                  similarity='inner_product', **kwargs):
-        super(ExamplePredictor, self).__init__(**kwargs)
-        self.model = ExampleNet(embedding.size(1),
+        super(RnnPredictor, self).__init__(**kwargs)
+        self.model = RnnNet(embedding.size(1), dropout_rate=0.2,
                                 similarity=similarity)
         self.embedding = torch.nn.Embedding(embedding.size(0),
                                             embedding.size(1))
@@ -31,7 +35,24 @@ class ExamplePredictor(BasePredictor):
                                           lr=self.learning_rate)
 
         self.loss = {
-            'BCELoss': torch.nn.BCEWithLogitsLoss()
+            'BCELoss': torch.nn.BCEWithLogitsLoss(),
+            'FocalLoss': FocalLoss(class_num=1),
+            #--
+            'L1Loss': torch.nn.L1Loss(),
+            'SmoothL1Loss': torch.nn.SmoothL1Loss(),
+            'MSELoss': torch.nn.MSELoss(),
+            'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
+            'NLLLoss': torch.nn.NLLLoss(),
+            'NLLLoss2d': torch.nn.NLLLoss2d(),
+            'KLDivLoss': torch.nn.KLDivLoss(),
+            'MarginRankingLoss': torch.nn.MarginRankingLoss(),
+            'MultiMarginLoss': torch.nn.MultiMarginLoss(),
+            'MultiLabelMarginLoss': torch.nn.MultiLabelMarginLoss(),
+            'SoftMarginLoss': torch.nn.SoftMarginLoss(),
+            'MultiLabelSoftMarginLoss': torch.nn.MultiLabelSoftMarginLoss(),
+            'CosineEmbeddingLoss': torch.nn.CosineEmbeddingLoss(),
+            'HingeEmbeddingLoss': torch.nn.HingeEmbeddingLoss()
+            #'TripleMarginLoss': torch.nn.TripleMarginLoss()                
         }[loss]
 
     def _run_iter(self, batch, training):
