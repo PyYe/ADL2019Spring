@@ -1,5 +1,8 @@
 import torch
 torch.cuda.manual_seed_all(518)
+import torch.nn.functional as F
+import logging
+import os
 
 class RnnNet(torch.nn.Module):
     """
@@ -27,12 +30,20 @@ class RnnNet(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout_rate)
         
     def forward(self, context, context_lens, options, option_lens):
-        context_out, context_states = self.rnn(context)
+        # Set initial hidden and cell states 
+        h_0 = torch.zeros(self.num_layers * 2, context.size(0), self.hidden_size).to(context.get_device())
+        
+        # Rnn w/o attention for context
+        context_out, context_states = self.rnn(context, h_0)
         context_out = self.dropout(context_out)
-        context = context_out.max(1)[0]
+        context = context_out.max(dim=1)[0]
         logits = []
         for i, option in enumerate(options.transpose(1, 0)):
-            option_out, option_states = self.rnn(option)
+            # Set initial hidden and cell states 
+            h_0 = torch.zeros(self.num_layers * 2, context.size(0), self.hidden_size).to(context.get_device())
+            
+            # Rnn w/o attention for option
+            option_out, option_states = self.rnn(option, h_0)
             option_out = self.dropout(option_out)
             option = option_out.max(1)[0]
             
@@ -45,9 +56,11 @@ class RnnNet(torch.nn.Module):
             elif self._similarity=='MLP': 
                 logit = self.similarity(torch.cat((context, option), dim=-1))[:, 0]
             else:
-                pass
+                logging.warning('Unknown self_similarity {}'.format(self._similarity))
+                os.system("pause") 
             
             logits.append(logit)
         
         logits = torch.stack(logits, 1)
+        #logits = F.softmax(torch.stack(logits, 1), dim=1)
         return logits

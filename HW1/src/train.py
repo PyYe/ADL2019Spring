@@ -60,7 +60,7 @@ def main(args):
         loss='BCELoss', #BCELoss, FocalLoss
         margin=0, 
         threshold=None,
-        similarity='MLP', #inner_product, Cosine, MLP
+        similarity='Cosine', #inner_product, Cosine, MLP
         **config['model_parameters']
     )
         
@@ -107,6 +107,7 @@ def main(args):
     )
     
     logging.info('start training!')
+    #print ('train', train)
     predictor.fit_dataset(train,
                           train.collate_fn,
                           [model_checkpoint, metrics_logger, early_stopping])

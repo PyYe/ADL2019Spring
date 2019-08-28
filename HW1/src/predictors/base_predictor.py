@@ -1,4 +1,5 @@
 import torch
+torch.cuda.manual_seed_all(518)
 import torch.utils.data.dataloader
 from torch.utils.data.dataloader import default_collate
 from tqdm import tqdm
@@ -33,7 +34,7 @@ class BasePredictor():
     def fit_dataset(self, data, collate_fn=default_collate, callbacks=[]):
         # Start the training loop.
         while self.epoch < self.max_epochs:
-            self.epoch += 1
+            
             # train and evaluate train score
             print('training %i' % self.epoch)
             # TODO: create dataloader for `train`.
@@ -41,7 +42,7 @@ class BasePredictor():
             # and `collate_fn=collate_fn`.
             ##----------------------------------------------------
             dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
-                                                     , shuffle=True#, num_workers=4
+                                                     #, shuffle=True#, num_workers=4
                                                      , collate_fn=collate_fn)
             ## dataloader=None
             ##----------------------------------------------------
@@ -56,7 +57,7 @@ class BasePredictor():
                 # and `collate_fn=collate_fn`.
                 # evaluate model
                 dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
-                                                     , shuffle=True#, num_workers=4
+                                                     #, shuffle=False#, num_workers=4
                                                      , collate_fn=collate_fn)
                 log_valid = self._run_epoch(dataloader, False)
             else:
@@ -68,6 +69,8 @@ class BasePredictor():
             if callback.early_stop:
                 print("Early stopping")
                 break
+            
+            self.epoch += 1
             
 
     def predict_dataset(self, data,
@@ -89,7 +92,7 @@ class BasePredictor():
         # and `collate_fn=collate_fn`.
         # evaluate model
         dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
-                                                     , shuffle=True#, num_workers=4
+                                                     #, shuffle=False#, num_workers=4
                                                      , collate_fn=collate_fn)
         ##dataloader = None
 
@@ -169,7 +172,7 @@ class BasePredictor():
                         self._run_iter(batch, training)
 
             # accumulate loss and metric scores
-            loss += batch_loss.item()
+            loss += batch_loss.item() * self.grad_accumulate_steps
             for metric in self.metrics:
                 metric.update(output, batch)
             trange.set_postfix(

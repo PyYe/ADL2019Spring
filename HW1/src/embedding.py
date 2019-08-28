@@ -1,6 +1,7 @@
 import re
 import torch
 import codecs
+torch.cuda.manual_seed_all(518)
 
 class Embedding:
     """
@@ -31,6 +32,12 @@ class Embedding:
             )
         if '<unk>' not in self.word_dict:
             self.add('<unk>')
+
+        if 'participant_1' not in self.word_dict:
+            self.add('participant_1')
+            
+        if 'participant_2' not in self.word_dict:
+            self.add('participant_2')
 
     def to_index(self, word):
         """

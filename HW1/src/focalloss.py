@@ -1,5 +1,5 @@
 import torch
-torch.cuda.manual_seed_all(9487)
+torch.cuda.manual_seed_all(518)
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable

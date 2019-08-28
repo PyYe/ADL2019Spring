@@ -26,16 +26,21 @@ def main(args):
         from predictors import ExamplePredictor
         PredictorClass = ExamplePredictor
         predictor = PredictorClass(metrics=[],
+                                   batch_size=500,
+                                   device=args.device,
                                **config['model_parameters'])
     elif config['arch'] == 'RnnNet':
         from predictors import RnnPredictor
         PredictorClass = RnnPredictor
         predictor = PredictorClass(metrics=[],
+                                   batch_size=500,
+                                   device=args.device,
                                **config['model_parameters'])
         
     else:
         pass
     
+    # load model
     model_path = os.path.join(
         args.model_dir,
         'model.pkl.{}'.format('best' if args.epoch==-1 else args.epoch))

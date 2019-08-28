@@ -1,5 +1,7 @@
 import random
+random.seed(518)
 import torch
+torch.cuda.manual_seed_all(518)
 from torch.utils.data import Dataset
 
 
@@ -46,11 +48,17 @@ class DialogDataset(Dataset):
             n_negative = min(len(negatives), self.n_negative)
 
         # TODO: sample positive indices
-        positive_indices = list(range(n_positive))
+        if self.n_positive == -1:
+            positive_indices = list(range(len(positive_ids)))
+        else:
+            positive_indices = random.sample(range(len(positive_ids)), k=n_positive)
         #print ('positive_indices:', positive_indices)
         
         # TODO: sample negative indices
-        negative_indices = list(range(n_negative))
+        if self.n_negative == -1:
+            negative_indices = list(range(len(negative_ids)))
+        else:
+            negative_indices = random.sample(range(len(negative_ids)), k=n_negative)
         #print ('negative_indices:', negative_indices)
         
         # collect sampled options
@@ -68,10 +76,33 @@ class DialogDataset(Dataset):
         
         data['labels'] = [1] * n_positive + [0] * n_negative
 
-        # use the last one utterance
-        data['context'] = data['context'][-1]
+        # Random shuffle options and labels
+        if self.shuffle:
+            zipped_data = list(zip(data['options'], data['option_ids'], data['labels']))
+            random.shuffle(zipped_data)
+            data['options'], data['option_ids'], data['labels'] = zip(*zipped_data)
+
+        
+        
+        # # use the last one utterance
+        #data['context'] = data['context'][-1]
+        #if len(data['context']) > self.context_padded_len:
+        #    data['context'] = data['context'][:self.context_padded_len]
+
+
+        # Simply concatenate them into single sequence.
+        # And separate them with special (speaker) tokens.
+        utterances = []
+        #print ('data:', data)
+        for speaker, utterance in zip(data['speaker'], data['context']):
+            utterances += [speaker]
+            utterances += utterance
+
+        data['context'] = utterances
+
+        # padding from tail for predicting next option
         if len(data['context']) > self.context_padded_len:
-            data['context'] = data['context'][:self.context_padded_len]
+            data['context'] = data['context'][-self.context_padded_len:]
 
         return data
 

@@ -1,0 +1,3 @@
+jason code get right when use my data
+
+so it is wrong on train and predict

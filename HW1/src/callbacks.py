@@ -4,6 +4,7 @@ import torch
 torch.cuda.manual_seed_all(518)
 import numpy as np
 from metrics import Recall
+import logging
 
 
 class Callback:
@@ -80,7 +81,7 @@ class EarlyStopping:
                 if self.counter >= self.patience:
                     self.early_stop = True
         else:
-            print ('unknown mode!')
+            logging.warning('unknown mode!')
     def save_checkpoint(self, score, model):
         '''Saves model when validation loss decrease.'''
         if self._verbose:

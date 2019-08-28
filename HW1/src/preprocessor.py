@@ -5,6 +5,10 @@ from dataset import DialogDataset
 from tqdm import tqdm
 import gensim
 from gensim.models import Word2Vec
+
+import nltk
+nltk.download()
+import string
 class Preprocessor:
     """
 
@@ -14,6 +18,9 @@ class Preprocessor:
     def __init__(self, embedding):
         self.embedding = embedding
         self.logging = logging.getLogger(name=__name__)
+        # Loading the symbols and the stopwords for English from NLTK.
+        self.symbols = set(string.punctuation)
+        self.stopwords = set(nltk.corpus.stopwords.words('english'))
 
     def tokenize(self, sentence):#sentence to list of words.
         """ Tokenize a sentence.
@@ -23,7 +30,17 @@ class Preprocessor:
             indices (list of str): List of tokens in a sentence. 
         """
         # TODO
-        return list(gensim.utils.tokenize(sentence))
+        # Remove the symbols.
+        for symbol in self.symbols:
+            sentence = sentence.replace(symbol, ' ')
+
+        # Parse and tokenize a string.
+        tokens = nltk.tokenize.word_tokenize(sentence.lower())
+        
+        # # Remove the stop words.
+        # tokens = [i for i in tokens if i not in self.stopwords]
+
+        return tokens
         pass
 
     def sentence_to_indices(self, sentence):
@@ -35,17 +52,16 @@ class Preprocessor:
         """
         # TODO
         # Hint: You can use `self.embedding`
-        train_sequences = []
-        #print ('list(gensim.utils.tokenize(sentence))', list(gensim.utils.tokenize(sentence)))
-        for i, s in enumerate(list(gensim.utils.tokenize(sentence))):
-            #if i == 0:
-            #    print ('s:',s)
-            toks = self.embedding.to_index(s)   # Plus 1 to reserve index 0 for OOV words
-            #if i == 0:
-            #    print ('toks:',toks)
-            train_sequences.append(toks)
-        #print ('train_sequences', train_sequences)
-        return train_sequences
+        indices = []
+
+        # Tokenize a sentence.
+        words = self.tokenize(sentence)
+
+        # Convert sentence to its word indices.
+        for word in words:
+            indices.append(self.embedding.to_index(word))
+       
+        return indices
         pass
 
     def collect_words(self, data_path, n_workers=4):
@@ -142,6 +158,10 @@ class Preprocessor:
             processed['context'].append(
                 self.sentence_to_indices(message['utterance'].lower())
             )
+            processed['speaker'].append(
+                self.embedding.to_index(message['speaker'].lower())
+            )
+            
 
         ## process options
         processed['options'] = []

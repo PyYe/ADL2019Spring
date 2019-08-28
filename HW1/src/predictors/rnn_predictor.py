@@ -57,6 +57,7 @@ class RnnPredictor(BasePredictor):
 
     def _run_iter(self, batch, training):
         with torch.no_grad():
+            #print ("batch['context']", batch['context'])
             context = self.embedding(batch['context'].to(self.device))
             options = self.embedding(batch['options'].to(self.device))
         logits = self.model.forward(
