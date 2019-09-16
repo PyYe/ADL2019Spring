@@ -46,8 +46,14 @@ class Recall(Metrics):
         #   of the batch.
         #print ('predicts:', predicts)
         #print ('batch["labels"]:', batch['labels'])
-        self.n += predicts.shape[0]
-        self.n_corrects +=  int(sum(predicts.max(1)[1]==batch['labels'].max(1)[1]))
+        #self.n += predicts.shape[0]
+        #self.n_corrects +=  int(sum(predicts.max(1)[1]==batch['labels'].max(1)[1]))
+        for i, predict in enumerate(predicts):
+            self.n += 1
+            best_ids = torch.argsort(predict, descending=True)[:self.at]
+            correct_answer_id = torch.argmax(batch['labels'][i])
+            if correct_answer_id in best_ids:
+                self.n_corrects += 1
         
     def get_score(self):
         return self.n_corrects / self.n

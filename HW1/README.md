@@ -1,5 +1,7 @@
 # How to run
 
+0. Download [dataset](https://www.kaggle.com/c/13262/download-all)
+
 1. Prepare the dataset and pre-trained embeddings (FastText is used here) in `./data`:
 
 ```
@@ -43,4 +45,13 @@ python predict.py ../models/rnn/ --epoch 3
 ```
 python predict.py ../models/rnn_attention/ --epoch 3
 ```
-where `--epoch` specifies the save model of which epoch to use.
+where `--epoch` specifies the save model of which epoch to use, otherwise, using best model.
+
+
+# Result
+
+* [Kaggle Competition](https://www.kaggle.com/c/adl2019-homework-1) 
+	* Public score :
+	* Private score :
+
+###### tags: `NTU` `ADL` `2019`

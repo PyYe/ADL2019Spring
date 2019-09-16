@@ -47,7 +47,7 @@ class ExamplePredictor(BasePredictor):
             'MSELoss': torch.nn.MSELoss(),
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
             'NLLLoss': torch.nn.NLLLoss(),
-            'NLLLoss2d': torch.nn.NLLLoss2d(),
+            #'NLLLoss2d': torch.nn.NLLLoss2d(),
             'KLDivLoss': torch.nn.KLDivLoss(),
             'MarginRankingLoss': torch.nn.MarginRankingLoss(),
             'MultiMarginLoss': torch.nn.MultiMarginLoss(),

@@ -6,6 +6,7 @@ sys.path.append('..')
 from modules import RnnNet
 
 from focalloss import FocalLoss
+import logging
 
 class RnnPredictor(BasePredictor):
     """
@@ -36,14 +37,14 @@ class RnnPredictor(BasePredictor):
 
         self.loss = {
             'BCELoss': torch.nn.BCEWithLogitsLoss(),
-            'FocalLoss': FocalLoss(class_num=1),
+            'FocalLoss': FocalLoss(),#(class_num=1),
             #--
             'L1Loss': torch.nn.L1Loss(),
             'SmoothL1Loss': torch.nn.SmoothL1Loss(),
             'MSELoss': torch.nn.MSELoss(),
             'CrossEntropyLoss': torch.nn.CrossEntropyLoss(),
             'NLLLoss': torch.nn.NLLLoss(),
-            'NLLLoss2d': torch.nn.NLLLoss2d(),
+            #'NLLLoss2d': torch.nn.NLLLoss2d(),
             'KLDivLoss': torch.nn.KLDivLoss(),
             'MarginRankingLoss': torch.nn.MarginRankingLoss(),
             'MultiMarginLoss': torch.nn.MultiMarginLoss(),
@@ -54,7 +55,9 @@ class RnnPredictor(BasePredictor):
             'HingeEmbeddingLoss': torch.nn.HingeEmbeddingLoss()
             #'TripleMarginLoss': torch.nn.TripleMarginLoss()                
         }[loss]
-
+        logging.info('Loss using ' + loss + '...')
+        logging.info('Similarity using ' + similarity + '...')
+        
     def _run_iter(self, batch, training):
         with torch.no_grad():
             #print ("batch['context']", batch['context'])

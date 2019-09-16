@@ -6,7 +6,7 @@ import pickle
 import sys
 import traceback
 import json
-from metrics import Recall
+#from metrics import Recall
 
 
 def main(args):
@@ -22,6 +22,7 @@ def main(args):
         config['model_parameters']['embedding'] = embedding.vectors
 
     # make model
+    logging.info('loading predictor from {}'.format(config['arch']))
     if config['arch'] == 'ExampleNet':
         from predictors import ExamplePredictor
         PredictorClass = ExamplePredictor
@@ -37,8 +38,16 @@ def main(args):
                                    device=args.device,
                                **config['model_parameters'])
         
+    elif config['arch'] == 'RnnAttentionNet':
+        from predictors import RnnAttentionPredictor
+        PredictorClass = RnnAttentionPredictor
+        predictor = PredictorClass(metrics=[],
+                                   batch_size=64,
+                                   device=args.device,
+                               **config['model_parameters'])
+        
     else:
-        pass
+        logging.warning('Unknown config["arch"] {}'.format(config['arch']))
     
     # load model
     model_path = os.path.join(

@@ -77,7 +77,7 @@ class EarlyStopping:
                 self._best = score
             else:
                 self.counter += 1
-                print(f'EarlyStopping counter: {self.counter} out of {self.patience} (Best score : {self._best} ; best epoch : {self._best_epoch})')
+                logging.info(f'EarlyStopping counter: {self.counter} out of {self.patience} (Best score : {self._best} ; best epoch : {self._best_epoch})')
                 if self.counter >= self.patience:
                     self.early_stop = True
         else:
@@ -88,7 +88,7 @@ class EarlyStopping:
             print(self._monitor,'improved : ', self._best, ' --> ', score, ' Saving model ...')
         model.save('{}.{}'
                        .format(self._filepath, 'best'))
-        print('Best model saved (%s : %f)' % (self._monitor, score))
+        print('Best model saved (%s : %f) at (%s)' % (self._monitor, score, self._filepath+'.best'))
         self._best = score
         
 class ModelCheckpoint(Callback):
@@ -119,5 +119,6 @@ class ModelCheckpoint(Callback):
                     print('Best model saved (%f)' % score)
 
         elif self._mode == 'all':
+            print('Model saved at'+ '{}.{}'.format(self._filepath, model.epoch))
             model.save('{}.{}'
                        .format(self._filepath, model.epoch))

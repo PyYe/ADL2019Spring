@@ -31,7 +31,7 @@ class BasePredictor():
 
         self.epoch = 0
 
-    def fit_dataset(self, data, collate_fn=default_collate, callbacks=[]):
+    def fit_dataset(self, train, collate_fn=default_collate, callbacks=[]):
         # Start the training loop.
         while self.epoch < self.max_epochs:
             
@@ -41,13 +41,13 @@ class BasePredictor():
             # You can set batch_size as `self.batch_size` here,
             # and `collate_fn=collate_fn`.
             ##----------------------------------------------------
-            dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
+            dataloader = torch.utils.data.DataLoader(dataset=train, batch_size=self.batch_size
                                                      #, shuffle=True#, num_workers=4
                                                      , collate_fn=collate_fn)
             ## dataloader=None
             ##----------------------------------------------------
             # train epoch
-            log_train = self._run_epoch(dataloader, True)
+            log_train = self._run_epoch(dataloader, training=True)
 
             # evaluate valid score
             if self.valid is not None:
@@ -56,10 +56,10 @@ class BasePredictor():
                 # You can set batch_size as `self.batch_size` here,
                 # and `collate_fn=collate_fn`.
                 # evaluate model
-                dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
+                dataloader = torch.utils.data.DataLoader(dataset=self.valid, batch_size=self.batch_size
                                                      #, shuffle=False#, num_workers=4
                                                      , collate_fn=collate_fn)
-                log_valid = self._run_epoch(dataloader, False)
+                log_valid = self._run_epoch(dataloader, training=False)
             else:
                 log_valid = None
 
@@ -91,7 +91,7 @@ class BasePredictor():
         # You can set batch_size as `self.batch_size` here,
         # and `collate_fn=collate_fn`.
         # evaluate model
-        dataloader = torch.utils.data.DataLoader(data, batch_size=self.batch_size
+        dataloader = torch.utils.data.DataLoader(dataset=data, batch_size=self.batch_size
                                                      #, shuffle=False#, num_workers=4
                                                      , collate_fn=collate_fn)
         ##dataloader = None

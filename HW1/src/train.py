@@ -25,7 +25,8 @@ def main(args):
     logging.info('loading valid data...')
     with open(config['model_parameters']['valid'], 'rb') as f:
         config['model_parameters']['valid'] = pickle.load(f)
-
+        #valid = pickle.load(f)
+        
     logging.info('loading train data...')
     with open(config['train'], 'rb') as f:
         train = pickle.load(f)
@@ -35,7 +36,7 @@ def main(args):
         from predictors import ExamplePredictor
         PredictorClass = ExamplePredictor
         predictor = PredictorClass(
-        metrics=[Recall()],
+        metrics=[Recall(1), Recall(10)],
         batch_size=128,
         max_epochs=1000000,
         dropout_rate=0.2, 
@@ -45,22 +46,24 @@ def main(args):
         margin=0, 
         threshold=None,
         similarity='MLP', #inner_product, Cosine, MLP
+        device=args.device,
         **config['model_parameters']
     )
     elif config['arch'] == 'RnnNet':
         from predictors import RnnPredictor
         PredictorClass = RnnPredictor
         predictor = PredictorClass(
-        metrics=[Recall()],
-        batch_size=128,
+        metrics=[Recall(1), Recall(10)],
+        batch_size=512,
         max_epochs=1000000,
         dropout_rate=0.2, 
         learning_rate=1e-3,
         grad_accumulate_steps=1,
-        loss='BCELoss', #BCELoss, FocalLoss
+        loss='FocalLoss', #BCELoss, FocalLoss
         margin=0, 
         threshold=None,
         similarity='Cosine', #inner_product, Cosine, MLP
+        device=args.device,
         **config['model_parameters']
     )
         
@@ -68,8 +71,8 @@ def main(args):
         from predictors import RnnAttentionPredictor
         PredictorClass = RnnAttentionPredictor
         predictor = PredictorClass(
-        metrics=[Recall()],
-        batch_size=128,
+        metrics=[Recall(1), Recall(10)],
+        batch_size=32,
         max_epochs=1000000,
         dropout_rate=0.2, 
         learning_rate=1e-3,
@@ -78,11 +81,12 @@ def main(args):
         margin=0, 
         threshold=None,
         similarity='MLP', #inner_product, Cosine, MLP
+        device=args.device,
         **config['model_parameters']
     )
     else:
         logging.warning('Unknown config["arch"] {}'.format(config['arch']))
-        #logging.info('Saving test to {}'.format(test_pkl_path))
+        
         
     
 
@@ -92,7 +96,9 @@ def main(args):
     #def ModelCheckpoint(filepath, monitor='loss', verbose=0, mode='min')
     model_checkpoint = ModelCheckpoint(
         os.path.join(args.model_dir, 'model.pkl'),
-        'Recall@{}'.format(10), 1, 'all'
+        monitor='Recall@{}'.format(10), 
+        verbose=1, 
+        mode='all'
     )
     metrics_logger = MetricsLogger(
         os.path.join(args.model_dir, 'log.json')
@@ -101,14 +107,14 @@ def main(args):
     early_stopping = EarlyStopping(
         os.path.join(args.model_dir, 'model.pkl'),
         monitor='Recall@{}'.format(10),
-                 verbose=1,
-                 mode='max',
-                 patience=10
+        verbose=1,
+        mode='max',
+        patience=30
     )
     
     logging.info('start training!')
     #print ('train', train)
-    predictor.fit_dataset(train,
+    predictor.fit_dataset(train, 
                           train.collate_fn,
                           [model_checkpoint, metrics_logger, early_stopping])
 

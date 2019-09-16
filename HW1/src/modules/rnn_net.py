@@ -33,10 +33,12 @@ class RnnNet(torch.nn.Module):
         # Set initial hidden and cell states 
         h_0 = torch.zeros(self.num_layers * 2, context.size(0), self.hidden_size).to(context.get_device())
         
-        # Rnn w/o attention for context
+        # Rnn w/o attention for context # [batch_size(10), padded_len_of_batch(52/33...), dim_word_vector(300)]-->[batch_size(10), padded_len_of_batch(52/33...), dim_mlp_output(256)]
         context_out, context_states = self.rnn(context, h_0)
-        context_out = self.dropout(context_out)
+        
+        #context_out = self.dropout(context_out) # [batch_size(10), padded_len_of_batch(52/33...), dim_mlp_output(256)]-->[batch_size(10), dim_mlp_output(256)] dim_mlp_output(256) means a context vector
         context = context_out.max(dim=1)[0]
+        
         logits = []
         for i, option in enumerate(options.transpose(1, 0)):
             # Set initial hidden and cell states 
@@ -44,16 +46,19 @@ class RnnNet(torch.nn.Module):
             
             # Rnn w/o attention for option
             option_out, option_states = self.rnn(option, h_0)
-            option_out = self.dropout(option_out)
+            #option_out = self.dropout(option_out)
             option = option_out.max(1)[0]
             
             
             #similarity between context and each option
             if self._similarity=='inner_product':
+                #print('self._similarity', self._similarity)
                 logit = ((context - option) ** 2).sum(-1)
             elif self._similarity=='Cosine': 
+                #print('self._similarity', self._similarity)
                 logit = torch.nn.CosineSimilarity(dim=1)(context, option)
             elif self._similarity=='MLP': 
+                #print('self._similarity', self._similarity)
                 logit = self.similarity(torch.cat((context, option), dim=-1))[:, 0]
             else:
                 logging.warning('Unknown self_similarity {}'.format(self._similarity))
@@ -61,6 +66,6 @@ class RnnNet(torch.nn.Module):
             
             logits.append(logit)
         
-        logits = torch.stack(logits, 1)
-        #logits = F.softmax(torch.stack(logits, 1), dim=1)
+        #logits = torch.stack(logits, 1)
+        logits = F.softmax(torch.stack(logits, 1), dim=1)
         return logits
