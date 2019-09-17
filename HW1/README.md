@@ -2,7 +2,7 @@
 
 0. Download [dataset](https://www.kaggle.com/c/13262/download-all)
 
-1. Prepare the dataset and pre-trained embeddings (FastText is used here) in `./data`:
+1. Prepare the dataset and pre-trained embeddings in `./data`:
 
 ```
 ./data/train.json
@@ -51,7 +51,13 @@ where `--epoch` specifies the save model of which epoch to use, otherwise, using
 # Result
 
 * [Kaggle Competition](https://www.kaggle.com/c/adl2019-homework-1) 
-	* Public score :
-	* Private score :
+	* Public score :  9.40666
+	* Private score : 9.42857
+
+# Reference
+ADL2019Spring HW1
+Dialogue Modeling
+* [Homework 1 Website](https://www.csie.ntu.edu.tw/~miulab/s107-adl/A1)
+* [Homework 1 Slide](https://docs.google.com/presentation/d/15LCy7TkJXl2pdz394gSPKY-fkwA3wFusv7h01lWOMSw/edit#slide=id.p)
 
 ###### tags: `NTU` `ADL` `2019`
